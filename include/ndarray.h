@@ -323,6 +323,7 @@ size_t ndarray<T>::get_dim(size_t in_dim)
     return shape[in_dim];
   else
     Fatal_Error("Dimension not supported");
+    return -1;
 }
 
 template <typename T>

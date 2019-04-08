@@ -44,7 +44,7 @@ Below is some detailed description of the code's features
     This code support 3 types of boundary conditions: 1) `Dirichlet`, 2) `Von Neumann`, 3) `Radiation`
 
 3. Initial Condition
-    For now, two types of IC is implemented. 1) `Gaussian pulse` 2) `Rectangular pulse`
+    For now, two types of IC is implemented. 1) `Uniform`, 2) `Gaussian pulse` 3) `Sine waves`
 
 4. Source term
     For now, source term is hard coded to be 0.

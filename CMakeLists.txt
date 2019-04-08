@@ -16,11 +16,11 @@ SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -D_DEBUG" CACHE STR
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall" CACHE STRING "Flags used by the linker during release builds" FORCE)
 
 #MKL(BLAS) library
-set(MKL_LD "/opt" CACHE PATH "path to mkl library")
-set(MKL_INCLUDE "/opt" CACHE PATH "path to mkl include")
-include_directories(${MKL_INCLUDE})
-set(CXX_LD ${CXX_LD} ${MKL_LD})
-set(CXX_LIB ${CXX_LIB} mkl_intel_lp64 mkl_tbb_thread mkl_core tbb pthread m dl)
+#set(MKL_LD "/opt" CACHE PATH "path to mkl library")
+#set(MKL_INCLUDE "/opt" CACHE PATH "path to mkl include")
+#include_directories(${MKL_INCLUDE})
+#set(CXX_LD ${CXX_LD} ${MKL_LD})
+#set(CXX_LIB ${CXX_LIB} mkl_intel_lp64 mkl_tbb_thread mkl_core tbb pthread m dl)
 
 #MPI
 find_package(MPI) 
