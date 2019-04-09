@@ -8,8 +8,11 @@ void read_params(char *input_fnameC, Param &input)
 {
     string input_fnameS(input_fnameC);
     param_reader pr(input_fnameS);
-    pr.openFile();
 
+    if (input.rank == 0)
+        cout << "Reading input parameters... " << flush;
+
+    pr.openFile();
     //mesh parameters
     pr.getVectorValue("mesh_xy0", input.mesh_xy0);
     pr.getVectorValue("mesh_xy1", input.mesh_xy1);
@@ -18,6 +21,7 @@ void read_params(char *input_fnameC, Param &input)
         Fatal_Error("Unexpected number of mesh parameters");
     //simulation parameters
     pr.getScalarValue("dt", input.dt);
+    pr.getScalarValue("adv_type", input.adv_type);
     pr.getScalarValue("n_steps", input.n_steps);
     pr.getScalarValue("plot_freq", input.plot_freq);
 
@@ -53,9 +57,14 @@ void read_params(char *input_fnameC, Param &input)
     }
 
     pr.closeFile();
+    if (input.rank == 0)
+        cout << "Done." << endl;
+
+
 
     //non-dimensionalization
-
+    if (input.rank == 0)
+        cout << "Non-dimensionalizing... " << flush;
     //mesh parameters
     for (size_t i = 0; i < 2; i++)
     {
@@ -121,4 +130,7 @@ void read_params(char *input_fnameC, Param &input)
         input.icdt_c0 /= input.L_ref;
         input.icdt_c1 /= input.L_ref;
     }
+    
+    if (input.rank == 0)
+        cout << "Done." << endl;
 }

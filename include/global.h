@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstring>
 #include <string>
+#include <vector>
 #include "mpi.h"
 #include "ndarray.h"
 
@@ -14,7 +15,7 @@
 struct Solution
 {
     //solution values
-    ndarray<ndarray<double>> sol; // local solution 2 registers
+    ndarray<ndarray<double>> u; // local solution array with multiple registers
     ndarray<double> rhs;          // du/dt=rhs
 };
 
@@ -27,6 +28,7 @@ struct Param
 
     //simulation parameters
     double dt;
+    int adv_type;//Euler or RK45
     int n_steps;
     int plot_freq;
 
@@ -46,6 +48,12 @@ struct Param
     //MPI
     int rank;
     int nproc;
+};
+
+enum ADV_ID
+{
+    EXP_EULER,
+    RK_45
 };
 
 enum BC_TYPE_ID

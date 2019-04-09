@@ -1,0 +1,34 @@
+//mesh parameters
+mesh_xy0 2 0 0 //lower left coord
+mesh_xy1 2 1 1 //upper right coord
+mesh_nxy 2 1000 1000    //number of points in each dir
+
+//simulation parameters
+dt 0.01
+adv_type 0 //Euler or RK45
+n_steps 1
+plot_freq 100
+
+//non-dimensionalization
+u_ref 1
+c_ref 1
+L_ref 1
+t_ref 1
+
+//boundary and initial conditions
+bc_type 4 0 0 0 0  //left right down up
+bc_val 4 0 0 0 0 
+
+ic_type 0
+icdt_type 0
+ic_a 1
+ic_b0 1
+ic_b1 1
+ic_c0 1
+ic_c1 1
+
+icdt_a 1
+icdt_b0 1
+icdt_b1 1
+icdt_c0 1
+icdt_c1 1

@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &input.rank);
     MPI_Comm_size(MPI_COMM_WORLD, &input.nproc);
+
     //read args
     if (argc < 2)
     {
@@ -37,23 +38,29 @@ int main(int argc, char *argv[])
         }
     }
 
+    //--------------Preprocessing-------------------------
     //read input params
     read_params(argv[1], input);
-    //generate mesh
+    //generate mesh from input
     mesh msh(input);
     //initialize solver and solution
-    solver solver_wave(input, msh);
-    solver_wave.initialize_solution();
+    solver solver_wave(&input, &msh, &wave_solution);
+    //set initial condition
+    solver_wave.set_ic();
 
-    //main loop
+    //-----------------main loop-------------------------
     while (i_steps < input.n_steps)
     {
         //solve
+        //for each RK loop
+        //calc_space
+        //advance in time
 
         i_steps++;
         //write result
         if (i_steps % input.plot_freq)
         {
+            //write to disk
         }
     }
 
