@@ -15,9 +15,14 @@ solver::solver(Param *in_input, mesh *in_msh, Solution *in_solu)
         solu_ptr->u.setup(1);
     else if (input_ptr->adv_type == RK_45)
         solu_ptr->u.setup(2);
+    else
+    {
+        Fatal_Error("Time discretization scheme not supported!");
+    }
+
     for (size_t i = 0; i < solu_ptr->u.get_len(); i++)
-        solu_ptr->u(i).setup({(size_t)msh_ptr->np, 2});
-    solu_ptr->rhs.setup({(size_t)msh_ptr->np,2});
+        solu_ptr->u(i).setup({(size_t)msh_ptr->np, 2}); //(u,v)
+    solu_ptr->rhs.setup(msh_ptr->np);                   //du/dt=rhs
 
     //setup point connectivity
     setup_connectivity();
@@ -65,26 +70,25 @@ void solver::setup_connectivity()
         cout << "Done." << endl;
 }
 
-double *solver::get_ptr(int in_p_global, int in_field)
+double *solver::get_ptr_u(int in_p_global)
 {
     if (in_p_global == -1)
         return NULL;
     else
     {
-        int local_idx = get_index(in_p_global, msh_ptr->p2global_p);
+        int local_idx = get_index(in_p_global, msh_ptr->p2global_p);//search in local points
         if (local_idx != -1) //this processor
-            return solu_ptr->u(0).get_ptr({(size_t)local_idx, (size_t)in_field});
-        else //in buffer
-            return in_buffer.get_ptr({(size_t)in_field, (size_t)(find(in_mpi_p.begin(), in_mpi_p.end(), in_p_global) - in_mpi_p.begin())});
+            return solu_ptr->u(0).get_ptr(local_idx);
+        else //from other processors
+            return in_buffer.get_ptr((size_t)(find(in_mpi_p.begin(), in_mpi_p.end(), in_p_global) - in_mpi_p.begin()));
     }
 }
 
-void solver::send_solution()
+void solver::send_solution()//send u
 {
     //fill out-buffer
-    for (size_t i = 0; i < 2; i++)
-        for (size_t j = 0; j < out_mpi_p.size(); j++)
-            out_buffer({i, j}) = *ptr_out({j, i});
+    for (size_t i = 0; i < out_mpi_p.size(); i++)
+        out_buffer(i) = *ptr_out(i);
 
     //send
     size_t ct_out = 0, ct_in = 0, req_ct = 0;
@@ -92,10 +96,10 @@ void solver::send_solution()
     {
         if (n_out(p) != 0)
         {
-            MPI_Isend(out_buffer.get_ptr({0, ct_out}), 2 * n_out(p), MPI_DOUBLE, p, input_ptr->rank, MPI_COMM_WORLD, out_req.get_ptr(req_ct));
-            MPI_Irecv(in_buffer.get_ptr({0, ct_in}), 2 * n_in(p), MPI_DOUBLE, p, p, MPI_COMM_WORLD, in_req.get_ptr(req_ct));
-            ct_in += 2 * n_in(p);
-            ct_out += 2 * n_out(p);
+            MPI_Isend(out_buffer.get_ptr(ct_out), n_out(p), MPI_DOUBLE, p, input_ptr->rank, MPI_COMM_WORLD, out_req.get_ptr(req_ct));
+            MPI_Irecv(in_buffer.get_ptr(ct_in), n_in(p), MPI_DOUBLE, p, p, MPI_COMM_WORLD, in_req.get_ptr(req_ct));
+            ct_in += n_in(p);
+            ct_out += n_out(p);
             req_ct++;
         }
     }
@@ -182,25 +186,23 @@ void solver::match_mpi()
     MPI_Waitall(n_req, in_req.get_ptr(), instatus.get_ptr());
     MPI_Waitall(n_req, out_req.get_ptr(), outstatus.get_ptr());
 
-    //set up in and out buffer
-    in_buffer.setup({2, in_mpi_p.size()});
-    out_buffer.setup({2, out_mpi_p.size()});
+    //set up in and out buffer for u
+    in_buffer.setup(in_mpi_p.size());
+    out_buffer.setup(out_mpi_p.size());
 }
 
 void solver::setup_ptrs()
 {
     //set up out sendinng pointers
-    ptr_out.setup({out_mpi_p.size(), 2});
-    for (size_t i = 0; i < 2; i++)
-        for (size_t j = 0; j < out_mpi_p.size(); j++)
-            ptr_out({j, i}) = get_ptr(out_mpi_p[j], i);
+    ptr_out.setup(out_mpi_p.size());
+    for (size_t i = 0; i < out_mpi_p.size(); i++)
+        ptr_out(i) = get_ptr_u(out_mpi_p[i]);
 
     //set up pointers to neighbour of local points
-    ptr_ngb.setup({4, (size_t)msh_ptr->np, 2});
-    for (size_t i = 0; i < 2; i++)//field
-        for (size_t j = 0; j < (size_t)msh_ptr->np; j++)//point
-            for (size_t k = 0; k < 4; k++)//neighbours
-                ptr_ngb({k, j, i}) = get_ptr(msh_ptr->p2c({k, j}), i);
+    ptr_ngb.setup({4, (size_t)msh_ptr->np});
+    for (size_t j = 0; j < (size_t)msh_ptr->np; j++) //point
+        for (size_t k = 0; k < 4; k++)               //neighbours
+            ptr_ngb({k, j}) = get_ptr_u(msh_ptr->p2c({k, j}));
 }
 
 void solver::set_ic()

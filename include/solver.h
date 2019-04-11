@@ -15,7 +15,7 @@ class solver
   void setup_connectivity();
   void match_mpi();
   void setup_ptrs();//set up pointers to solution array or buffers
-  double* get_ptr(int in_p_global,int in_field);
+  double* get_ptr_u(int in_p_global);
 
   void send_solution();
   void receive_solution();
