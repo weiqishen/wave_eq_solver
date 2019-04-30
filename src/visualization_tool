@@ -1,9 +1,0 @@
-import "solution.txt";
-Z = solution1(1:51,1:51); % Choose rows and columns corresponding to your time for which you wanna plot
-X1=0;
-X2 = 10;
-mesh_res = 50
-res = (X2-X1)/mesh_res
-[X,Y] = meshgrid(X1,res,X2);
-mesh(X,Y,Z);
-
