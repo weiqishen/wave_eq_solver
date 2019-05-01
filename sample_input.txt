@@ -1,7 +1,7 @@
 //mesh parameters
 mesh_xy0 2 0 0 //lower left coord
 mesh_xy1 2 1 1 //upper right coord
-mesh_nxy 2 1000 1000    //number of points in each dir
+mesh_nxy 2 1000 1000   //number of points in each dir
 
 //simulation parameters
 dt 0.01
